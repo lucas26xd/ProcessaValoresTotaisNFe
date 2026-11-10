@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processador de NFS-e</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px 40px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+            margin-top: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+        }
+
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #555;
+            font-size: 15px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        #folderInput {
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-value.highlight {
+            color: #28a745;
+        }
+
+        .stat-value.retencao {
+            color: #dc3545;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nfse-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .nfse-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .nfse-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nfse-number {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .nfse-date {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .nfse-body {
+            padding: 20px;
+        }
+
+        .nfse-section {
+            margin-bottom: 15px;
+        }
+
+        .nfse-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .section-content {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .value-box {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .value-box:hover {
+            border-color: #667eea;
+        }
+
+        .value-box.servico {
+            background: #e8f5e9;
+        }
+
+        .value-box.liquido {
+            background: #e3f2fd;
+        }
+
+        .value-box.retencao {
+            background: #ffebee;
+        }
+
+        .value-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .value-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .value-box.servico .value-amount {
+            color: #2e7d32;
+        }
+
+        .value-box.liquido .value-amount {
+            color: #1565c0;
+        }
+
+        .value-box.retencao .value-amount {
+            color: #c62828;
+        }
+
+        .retencao-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .retencao-badge.sim {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .retencao-badge.nao {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .empresa-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .empresa-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .empresa-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .empresa-value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .file-list {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-list-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .file-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .file-tag {
+            background: #f0f2ff;
+            color: #667eea;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-tag.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .file-tag .status-icon {
+            font-size: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .empresa-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Processador de NFS-e</h1>
+            <p class="subtitle">Selecione uma pasta com arquivos XML de NFS-e para visualizar as informações</p>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Clique para selecionar uma pasta ou arraste arquivos XML</div>
+                <div class="upload-hint">Aceita pastas ou arquivos .xml soltos</div>
+            </div>
+
+            <input type="file" id="folderInput" webkitdirectory directory multiple>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">Processando arquivos...</div>
+            </div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFiles">0</div>
+                    <div class="stat-label">NFS-e Processadas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value highlight" id="totalServico">R$ 0,00</div>
+                    <div class="stat-label">Valor Total Serviço</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalLiquido">R$ 0,00</div>
+                    <div class="stat-label">Valor Total Líquido</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value retencao" id="totalDesconto">R$ 0,00</div>
+                    <div class="stat-label">Total Desconto Incond.</div>
+                </div>
+            </div>
+
+            <div class="file-list">
+                <div class="file-list-title">Arquivos Processados</div>
+                <div class="file-items" id="fileItems"></div>
+            </div>
+
+            <div class="nfse-list" id="nfseList"></div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const folderInput = document.getElementById('folderInput');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const fileItems = document.getElementById('fileItems');
+        const nfseList = document.getElementById('nfseList');
+        const totalFilesEl = document.getElementById('totalFiles');
+        const totalServicoEl = document.getElementById('totalServico');
+        const totalLiquidoEl = document.getElementById('totalLiquido');
+        const totalDescontoEl = document.getElementById('totalDesconto');
+
+        let processedData = [];
+
+        uploadArea.addEventListener('click', () => {
+            folderInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const allFiles = Array.from(e.dataTransfer.files);
+            const xmlFiles = allFiles.filter(f => f.name.toLowerCase().endsWith('.xml'));
+            
+            if (xmlFiles.length > 0) {
+                processFiles(xmlFiles);
+            } else {
+                alert('Nenhum arquivo XML encontrado. Arraste arquivos .xml ou uma pasta com XMLs.');
+            }
+        });
+
+        folderInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files).filter(f => f.name.endsWith('.xml'));
+            processFiles(files);
+        });
+
+        async function processFiles(files) {
+            if (files.length === 0) {
+                alert('Nenhum arquivo XML encontrado na pasta selecionada.');
+                return;
+            }
+
+            loading.classList.add('show');
+            results.classList.remove('show');
+            processedData = [];
+
+            let successCount = 0;
+            let totalServico = 0;
+            let totalLiquido = 0;
+            let totalDesconto = 0;
+
+            for (let file of files) {
+                try {
+                    const text = await file.text();
+                    const data = parseNFeXML(text, file.name);
+                    if (data) {
+                        processedData.push(data);
+                        successCount++;
+                        totalServico += data.valorServico || 0;
+                        totalLiquido += data.valorLiquido || 0;
+                        totalDesconto += data.valorDescontoIncond || 0;
+                    }
+                } catch (err) {
+                    console.error(`Erro ao processar ${file.name}:`, err);
+                }
+            }
+
+            loading.classList.remove('show');
+            results.classList.add('show');
+
+            totalFilesEl.textContent = successCount;
+            totalServicoEl.textContent = formatCurrency(totalServico);
+            totalLiquidoEl.textContent = formatCurrency(totalLiquido);
+            totalDescontoEl.textContent = formatCurrency(totalDesconto);
+
+            // File tags
+            fileItems.innerHTML = files.map(f => {
+                const success = processedData.some(d => d.arquivo === f.name);
+                return `
+                    <div class="file-tag ${success ? '' : 'error'}">
+                        <span class="status-icon">${success ? '✓' : '✗'}</span>
+                        ${f.name}
+                    </div>
+                `;
+            }).join('');
+
+            // NFS-e cards
+            nfseList.innerHTML = processedData.map(d => `
+                <div class="nfse-card">
+                    <div class="nfse-header">
+                        <div>
+                            <div class="nfse-number">NFS-e Nº ${d.numeroNFSe}</div>
+                            <div class="nfse-date">Emitida em ${d.dataEmissao} • Competência: ${d.dataCompetencia}</div>
+                        </div>
+                    </div>
+                    <div class="nfse-body">
+                        <div class="nfse-section">
+                            <div class="section-title">Empresa Emitente</div>
+                            <div class="empresa-info">
+                                <div class="empresa-item">
+                                    <span class="empresa-label">Nome</span>
+                                    <span class="empresa-value">${d.nomeEmitente}</span>
+                                </div>
+                                <div class="empresa-item">
+                                    <span class="empresa-label">CNPJ</span>
+                                    <span class="empresa-value">${d.cnpjEmitente}</span>
+                                </div>
+                                <div class="empresa-item">
+                                    <span class="empresa-label">Cidade/UF</span>
+                                    <span class="empresa-value">${d.cidadeEmitente}/${d.ufEmitente}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nfse-section">
+                            <div class="section-title">Tomador do Serviço</div>
+                            <div class="empresa-info">
+                                <div class="empresa-item">
+                                    <span class="empresa-label">Nome</span>
+                                    <span class="empresa-value">${d.nomeTomador}</span>
+                                </div>
+                                <div class="empresa-item">
+                                    <span class="empresa-label">CNPJ/CPF</span>
+                                    <span class="empresa-value">${d.cnpjTomador}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nfse-section">
+                            <div class="section-title">Descrição do Serviço</div>
+                            <div class="section-content">${d.descricaoServico}</div>
+                        </div>
+
+                        <div class="values-grid">
+                            <div class="value-box servico">
+                                <div class="value-label">Valor do Serviço</div>
+                                <div class="value-amount">${formatCurrency(d.valorServico)}</div>
+                            </div>
+                            <div class="value-box liquido">
+                                <div class="value-label">Valor Líquido</div>
+                                <div class="value-amount">${formatCurrency(d.valorLiquido)}</div>
+                            </div>
+                            <div class="value-box retencao">
+                                <div class="value-label">Desconto Incondicionado</div>
+                                <div class="value-amount">${formatCurrency(d.valorDescontoIncond)}</div>
+                                ${d.valorDescontoIncond > 0 ? '<span class="retencao-badge sim">Com desconto</span>' : '<span class="retencao-badge nao">Sem desconto</span>'}
+                            </div>
+                        </div>
+
+                        <div class="nfse-section" style="margin-top: 15px;">
+                            <div class="section-title">Retenções</div>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <span class="retencao-badge ${d.retencaoISS === 'Sim' ? 'sim' : 'nao'}">
+                                    ISS: ${d.retencaoISS}
+                                </span>
+                                <span class="retencao-badge ${d.retencaoPisCofins === 'Sim' ? 'sim' : 'nao'}">
+                                    PIS/COFINS: ${d.retencaoPisCofins}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function parseNFeXML(xmlText, fileName) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+
+            if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                throw new Error('XML inválido');
+            }
+
+            const ns = 'http://www.sped.fazenda.gov.br/nfse';
+
+            function getElementByTag(parent, tagName) {
+                return parent.getElementsByTagNameNS(ns, tagName)[0] ||
+                       parent.getElementsByTagName(tagName)[0];
+            }
+
+            function getElementValue(parent, tagName) {
+                const el = getElementByTag(parent, tagName);
+                return el ? el.textContent.trim() : '';
+            }
+
+            const infNFSe = getElementByTag(xmlDoc, 'infNFSe');
+            const DPS = getElementByTag(xmlDoc, 'DPS');
+            const infDPS = getElementByTag(DPS, 'infDPS');
+
+            const emit = getElementByTag(infNFSe, 'emit');
+            const enderNac = getElementByTag(emit, 'enderNac');
+
+            const toma = getElementByTag(infDPS, 'toma');
+
+            const serv = getElementByTag(infDPS, 'serv');
+            const cServ = getElementByTag(serv, 'cServ');
+
+            const valoresServ = getElementByTag(infDPS, 'valores');
+            const vServPrest = getElementByTag(valoresServ, 'vServPrest');
+
+            const valoresNFSe = getElementByTag(infNFSe, 'valores');
+
+            const trib = getElementByTag(valoresServ, 'trib');
+            const tribMun = getElementByTag(trib, 'tribMun');
+            const tribFed = getElementByTag(trib, 'tribFed');
+            const piscofins = getElementByTag(tribFed, 'piscofins');
+
+            const dhEmi = getElementValue(infDPS, 'dhEmi');
+            const dCompet = getElementValue(infDPS, 'dCompet');
+
+            const dataEmissao = dhEmi ? formatDate(dhEmi) : '';
+            const dataCompetencia = dCompet ? formatDate(dCompet) : '';
+
+            const vServ = parseFloat(getElementValue(vServPrest, 'vServ')) || 0;
+            const vLiq = parseFloat(getElementValue(valoresNFSe, 'vLiq')) || 0;
+            const vDescIncond = parseFloat(getElementValue(valoresServ, 'vDescIncond')) || 0;
+
+            // Retenção ISSQN: tpRetISSQN = '1' significa "Não Retido"
+            const tpRetISSQN = getElementValue(tribMun, 'tpRetISSQN');
+            const tpRetPisCofins = getElementValue(piscofins, 'tpRetPisCofins');
+
+            const retencaoISS = tpRetISSQN === '1' ? 'Não' : 'Sim';
+            const retencaoPisCofins = tpRetPisCofins === '1' ? 'Não' : 'Sim';
+
+            return {
+                arquivo: fileName,
+                numeroNFSe: getElementValue(infNFSe, 'nNFSe'),
+                dataEmissao: dataEmissao,
+                dataCompetencia: dataCompetencia,
+                cnpjEmitente: getElementValue(emit, 'CNPJ'),
+                nomeEmitente: getElementValue(emit, 'xNome'),
+                ufEmitente: getElementValue(enderNac, 'UF'),
+                cidadeEmitente: getElementValue(enderNac, 'cMun'),
+                cnpjTomador: getElementValue(toma, 'CNPJ') || getElementValue(toma, 'CPF'),
+                nomeTomador: getElementValue(toma, 'xNome'),
+                descricaoServico: getElementValue(cServ, 'xDescServ'),
+                valorServico: vServ,
+                valorLiquido: vLiq,
+                valorDescontoIncond: vDescIncond,
+                retencaoISS: retencaoISS,
+                retencaoPisCofins: retencaoPisCofins
+            };
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
+                const parts = dateStr.split('/');
+                if (parts.length === 3) {
+                    return dateStr;
+                }
+                return dateStr;
+            }
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+    </script>
+</body>
+</html>
