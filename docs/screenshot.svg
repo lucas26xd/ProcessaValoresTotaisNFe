@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Prévia do Processador de NFS-e</title>
+  <desc id="desc">Ilustração da tela do aplicativo com seleção de XML, totais e resumo de uma nota fiscal.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#667eea"/><stop offset="1" stop-color="#764ba2"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#1f2450" flood-opacity=".18"/></filter>
+  </defs>
+  <rect width="1200" height="760" rx="28" fill="url(#bg)"/>
+  <rect x="55" y="45" width="1090" height="670" rx="22" fill="#f5f6fc" filter="url(#shadow)"/>
+  <rect x="55" y="45" width="1090" height="66" rx="22" fill="#fff"/>
+  <path d="M55 89h1090v22H55z" fill="#fff"/>
+  <circle cx="88" cy="78" r="8" fill="#ff6b6b"/><circle cx="115" cy="78" r="8" fill="#ffd166"/><circle cx="142" cy="78" r="8" fill="#06d6a0"/>
+  <text x="600" y="84" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="#667085">Processador de NFS-e</text>
+  <text x="100" y="158" font-family="Arial,sans-serif" font-size="29" font-weight="700" fill="#292d3e">Processador de NFS-e</text>
+  <text x="100" y="185" font-family="Arial,sans-serif" font-size="15" fill="#73788c">Selecione uma pasta com arquivos XML para visualizar as informações</text>
+  <rect x="95" y="212" width="1010" height="112" rx="14" fill="#f8f9ff" stroke="#8795ed" stroke-width="2.5" stroke-dasharray="10 8"/>
+  <text x="600" y="258" text-anchor="middle" font-family="Arial,sans-serif" font-size="30">📁</text>
+  <text x="600" y="286" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" font-weight="600" fill="#454a5d">Clique para selecionar uma pasta ou arraste arquivos XML</text>
+  <text x="600" y="307" text-anchor="middle" font-family="Arial,sans-serif" font-size="12" fill="#9298aa">Aceita pastas ou arquivos .xml soltos</text>
+  <g font-family="Arial,sans-serif">
+    <rect x="95" y="350" width="238" height="88" rx="12" fill="#fff"/><rect x="350" y="350" width="238" height="88" rx="12" fill="#fff"/><rect x="605" y="350" width="238" height="88" rx="12" fill="#fff"/><rect x="860" y="350" width="245" height="88" rx="12" fill="#fff"/>
+    <text x="214" y="383" text-anchor="middle" font-size="13" fill="#73788c">NFS-e PROCESSADAS</text><text x="214" y="418" text-anchor="middle" font-size="25" font-weight="700" fill="#667eea">12</text>
+    <text x="469" y="383" text-anchor="middle" font-size="13" fill="#73788c">VALOR TOTAL SERVIÇO</text><text x="469" y="418" text-anchor="middle" font-size="23" font-weight="700" fill="#2e7d32">R$ 8.450,00</text>
+    <text x="724" y="383" text-anchor="middle" font-size="13" fill="#73788c">VALOR TOTAL LÍQUIDO</text><text x="724" y="418" text-anchor="middle" font-size="23" font-weight="700" fill="#1565c0">R$ 7.980,00</text>
+    <text x="982" y="383" text-anchor="middle" font-size="13" fill="#73788c">TOTAL DESCONTO INCOND.</text><text x="982" y="418" text-anchor="middle" font-size="23" font-weight="700" fill="#c62828">R$ 150,00</text>
+  </g>
+  <rect x="95" y="458" width="1010" height="40" rx="10" fill="#fff"/>
+  <text x="116" y="484" font-family="Arial,sans-serif" font-size="14" font-weight="700" fill="#383d4f">Arquivos processados</text>
+  <rect x="280" y="467" width="142" height="23" rx="12" fill="#edf8ef"/><text x="351" y="483" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#2e7d32">✓ nota-001.xml</text>
+  <rect x="432" y="467" width="142" height="23" rx="12" fill="#edf8ef"/><text x="503" y="483" text-anchor="middle" font-family="Arial,sans-serif" font-size="11" fill="#2e7d32">✓ nota-002.xml</text>
+  <rect x="95" y="516" width="1010" height="165" rx="14" fill="#fff"/>
+  <path d="M95 530a14 14 0 0 1 14-14h982a14 14 0 0 1 14 14v42H95z" fill="url(#bg)"/>
+  <text x="120" y="548" font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#fff">NFS-e Nº 1024</text>
+  <text x="120" y="565" font-family="Arial,sans-serif" font-size="12" fill="#f1f0ff">Emitida em 10/11/2026 • Competência: 11/2026</text>
+  <text x="120" y="605" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1" fill="#9298aa">EMPRESA EMITENTE</text>
+  <text x="120" y="630" font-family="Arial,sans-serif" font-size="14" fill="#33394b">Exemplo Serviços Ltda.  •  CNPJ: 00.000.000/0001-00</text>
+  <text x="120" y="657" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="1" fill="#9298aa">VALORES E RETENÇÕES</text>
+  <text x="360" y="657" font-family="Arial,sans-serif" font-size="14" fill="#33394b">Serviço: R$ 1.000,00  ·  Líquido: R$ 950,00  ·  ISS: Não</text>
+</svg>
